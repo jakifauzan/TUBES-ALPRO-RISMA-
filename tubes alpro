@@ -1,0 +1,178 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type Book struct {
+	ID          int
+	Title       string
+	Author      string
+	Category    string
+	IsBorrowed  bool
+}
+
+type Borrow struct {
+	BookID       int
+	BorrowerName string
+	BorrowDate   time.Time
+	ReturnDate   time.Time
+}
+
+var books []Book
+var borrows []Borrow
+
+func showMenu() {
+	fmt.Println("===============================================")
+    fmt.Println("      Selamat Datang di JKR Knowledge Hub     ")
+    fmt.Println("          *** JKR Knowledge Hub ***           ")
+    fmt.Println("===============================================")
+    fmt.Println("          Pilih Menu Perpustakaan:            ")
+    fmt.Println("===============================================")
+    fmt.Println("1. Tambah Buku  (Tambah ilmu! Yay!)           ")
+    fmt.Println("2. Edit Buku    (Ayo, ubah jadi lebih keren!)")
+    fmt.Println("3. Hapus Buku   (Mau buang buku? Hati-hati! 😉)")
+    fmt.Println("4. Lihat Semua Buku (Lihat semua koleksi kita!)")
+    fmt.Println("5. Cari Buku Berdasarkan ID (Cari buku? Gampang!)")
+    fmt.Println("6. Hitung Denda Peminjaman (Hati-hati telat ya!)")
+    fmt.Println("7. Tambah Peminjaman (Ayo pinjam buku baru!)")
+    fmt.Println("8. Keluar (Wah, udah selesai? Sampai jumpa lagi!)")
+    fmt.Println("===============================================")
+    fmt.Print("Pilih menu (1-8): ")
+}
+
+func addBook() {
+	var title, author, category string
+	var id int
+
+	fmt.Println("===============================================")
+    fmt.Println("              Tambah Buku Perpustakaan        ")
+    fmt.Println("===============================================")
+    fmt.Print("Masukkan ID Buku        : ")
+    fmt.Scanln(&id)
+    fmt.Print("Masukkan Judul Buku     : ")
+    fmt.Scanln(&title)
+    fmt.Print("Masukkan Pengarang Buku : ")
+    fmt.Scanln(&author)
+    fmt.Print("Masukkan Kategori Buku  : ")
+    fmt.Scanln(&category)
+    fmt.Println("===============================================")
+
+	book := Book{
+		ID:         id,
+		Title:      title,
+		Author:     author,
+		Category:   category,
+		IsBorrowed: false,
+	}
+
+	books = append(books, book)
+	fmt.Println("🎉 Buku berhasil ditambahkan! 🎉")
+    fmt.Println("===============================================")
+}
+
+func searchBookByID(id int) {
+	for _, book := range books {
+		if book.ID == id {
+			fmt.Printf("📚 Buku ditemukan: %+v\n", book)
+			return
+		}
+	}
+	fmt.Println("Oops! Buku tidak ditemukan! 😢")
+}
+
+func displayBooks() {
+	if len(books) == 0 {
+		fmt.Println("Oh no! Tidak ada buku dalam perpustakaan. Yuk, tambahkan buku baru! 📚")
+		return
+	}
+
+	fmt.Println("===== Daftar Buku Perpustakaan =====")
+	for _, book := range books {
+		status := "Tersedia"
+		if book.IsBorrowed {
+			status = "Dipinjam"
+		}
+		fmt.Printf("ID: %d | Judul: %s | Pengarang: %s | Kategori: %s | Status: %s\n", book.ID, book.Title, book.Author, book.Category, status)
+	}
+}
+
+func calculateFine() {
+	var daysLate int
+	fmt.Print("Masukkan jumlah hari keterlambatan: ")
+	fmt.Scanln(&daysLate)
+
+	denda := 5000 * daysLate
+	fmt.Printf("😱 Denda yang harus dibayar: Rp %d (Aduh, hati-hati telat ya!)\n", denda)
+}
+
+func borrowBook() {
+	var id int
+	var borrowerName string
+
+	fmt.Print("Masukkan ID Buku yang ingin dipinjam: ")
+	fmt.Scanln(&id)
+
+	fmt.Print("Masukkan Nama Peminjam: ")
+	fmt.Scanln(&borrowerName)
+
+	for i := range books {
+		if books[i].ID == id {
+			if books[i].IsBorrowed {
+				fmt.Println("Oh no! Buku ini sudah dipinjam. Yuk, cari buku lain! 📚")
+				return
+			}
+
+			borrowDate := time.Now()
+			returnDate := borrowDate.Add(7 * 24 * time.Hour)
+
+			borrow := Borrow{
+				BookID:       id,
+				BorrowerName: borrowerName,
+				BorrowDate:   borrowDate,
+				ReturnDate:   returnDate,
+			}
+			borrows = append(borrows, borrow)
+
+			books[i].IsBorrowed = true
+			fmt.Printf("✅ Buku %s berhasil dipinjam oleh %s. Tanggal pengembalian: %v\n", books[i].Title, borrowerName, returnDate)
+			return
+		}
+	}
+	fmt.Println("Buku tidak ditemukan! 😔")
+}
+
+func main() {
+	for {
+		showMenu()
+
+		var choice int
+		fmt.Scanln(&choice)
+
+		switch choice {
+		case 1:
+			addBook()
+		case 2:
+			fmt.Println("Fitur Edit Buku belum diimplementasikan. Tapi tenang, segera hadir! 😉")
+		case 3:
+			fmt.Println("Fitur Hapus Buku belum diimplementasikan. Buku-buku kita terlalu berharga! 📚❤")
+		case 4:
+			displayBooks()
+		case 5:
+			var id int
+			fmt.Print("Masukkan ID buku untuk dicari: ")
+			fmt.Scanln(&id)
+			searchBookByID(id)
+		case 6:
+			calculateFine()
+		case 7:
+			borrowBook()
+		case 8:
+			fmt.Println("😢 Terima kasih! Sampai jumpa lagi di JKR Knowledge Hub!")
+			return
+		default:
+			fmt.Println("Oops! Pilihan tidak valid! Coba lagi ya! 😅")
+		}
+	}
+}
